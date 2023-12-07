@@ -44,6 +44,7 @@ class Layer {
             if (!output_.empty())  std::cout << "  output: "  << output_  << std::endl;
         }
         // TODO: additional required methods
+        
 
     protected:
         const LayerType layer_type_;
@@ -79,6 +80,35 @@ class ReLu : public Layer {
     public:
         ReLu() : Layer(LayerType::ReLu) {}
     // TODO
+    public:
+        void fwd() override {
+        // Implement the forward pass for ReLu layer
+        const float* input_data = input_.data();
+        float* output_data = output_.data();
+        // Compute physical strides for each dimension
+        const int stride_N = input_.N * input_.W * input_.C;
+        const int stride_H = input_.W * input_.C;
+        const int stride_W = input_.C;
+        const int stride_C = 1;
+
+        // An auxiliary function that maps logical index to the physical offset
+        auto offset = [=](int n, int h, int w, int c)
+        { return input_.N * stride_N + input_.H * stride_H + input_.W * stride_W + input_.C * stride_C; };
+    
+        size_t size = input_.N * input_.C * input_.H * input_.W;
+
+        for (size_t n = 0; n < input_.N; ++n)
+            {for (size_t c = 0; c < input_.C; ++c)
+                {for (size_t h = 0; h < input_.H; ++h)
+                    {for (size_t w = 0; w < input_.W; ++w)
+                        {
+                            int off = offset(n, h, w, c);
+                            output_data[off] = std::max(0.0f, input_data[off]);
+                        }
+                    }
+                }
+            }
+        }
 };
 
 
